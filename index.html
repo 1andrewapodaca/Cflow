@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Call Flow Coach – Marketing Analytics</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    header {
+      border-bottom: 1px solid #1f2933;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0 0 4px;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .panel {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 12px 12px 14px;
+    }
+    .panel h2 {
+      font-size: 1rem;
+      margin: 0 0 8px;
+      color: #e5e7eb;
+    }
+    .panel small {
+      color: #6b7280;
+    }
+    .controls {
+      flex: 1 1 260px;
+      min-width: 260px;
+      max-width: 320px;
+    }
+    .content {
+      flex: 2 1 380px;
+      min-width: 340px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: #9ca3af;
+    }
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .toggle-row label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #cbd5f5;
+    }
+    textarea.script-display {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 8px 0 4px;
+      color: #e5e7eb;
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .chip {
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid #4b5563;
+      font-size: 0.78rem;
+      cursor: pointer;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    .chip.active {
+      border-color: #818cf8;
+      background: #111827;
+    }
+    .reaction-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .reaction-buttons button {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .reaction-buttons button:hover {
+      border-color: #a5b4fc;
+    }
+    .reaction-buttons button.active {
+      border-color: #818cf8;
+      background: #111827;
+    }
+    .followup-list {
+      list-style: decimal;
+      padding-left: 18px;
+      margin: 4px 0 0;
+    }
+    .followup-list li {
+      font-size: 0.85rem;
+      margin-bottom: 3px;
+      cursor: pointer;
+    }
+    .followup-list li.used {
+      color: #6b7280;
+      text-decoration: line-through;
+    }
+    .role-note {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin: 4px 0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #020617;
+      border: 1px dashed #374151;
+    }
+    .two-col {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .two-col > div {
+      flex: 1 1 160px;
+      min-width: 160px;
+    }
+    @media (max-width: 768px) {
+      .layout {
+        flex-direction: column;
+      }
+      .controls, .content {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Live Call Flow Coach – Marketing Analytics</h1>
+      <p>Use this during calls to select an opener, adapt to reactions, and guide your first 60 seconds.</p>
+    </header>
+
+    <div class="layout">
+      <!-- LEFT: CONTROLS -->
+      <div class="panel controls">
+        <h2>Call Setup</h2>
+        <small>Adjust these based on who you’re calling and how the call feels.</small>
+
+        <div style="margin-top: 8px;">
+          <label for="roleSelect">Prospect role</label>
+          <select id="roleSelect">
+            <option value="generic">Generic marketing leader</option>
+            <option value="cmo">CMO / SVP Marketing</option>
+            <option value="vp">VP / Head of Marketing / Growth</option>
+            <option value="ops">Marketing Ops / RevOps</option>
+            <option value="demand">Director Demand Gen / Performance</option>
+          </select>
+
+          <label for="openerSelect">Opener style</label>
+          <select id="openerSelect">
+            <option value="clarity">Option 1 – Clarity / Visibility</option>
+            <option value="performance">Option 3 – Performance / Focus</option>
+          </select>
+
+          <label for="paceSelect">Pace</label>
+          <select id="paceSelect">
+            <option value="standard">Normal</option>
+            <option value="rushed">They sound rushed</option>
+            <option value="micro">10-second micro opener</option>
+          </select>
+
+          <div class="toggle-row">
+            <label><input type="checkbox" id="showAndrew" checked /> Use “Andrew” in script</label>
+            <label><input type="checkbox" id="showCompany" checked /> Mention Certatude</label>
+          </div>
+        </div>
+
+        <div class="section-title">Prospect reaction (live)</div>
+        <div class="hint">Tap what you hear, then read the suggested line.</div>
+        <div class="reaction-buttons">
+          <button type="button" data-reaction="open">Open / curious</button>
+          <button type="button" data-reaction="busy">Busy / time-pressed</button>
+          <button type="button" data-reaction="fine">“We’re fine / covered”</button>
+          <button type="button" data-reaction="notnow">“Not a priority now”</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: CONTENT -->
+      <div class="panel content">
+        <div class="two-col">
+          <div>
+            <div class="section-title">Opener to read</div>
+            <div class="hint">Use [Prospect], [Company] as mental placeholders.</div>
+            <textarea id="openerText" class="script-display" readonly></textarea>
+          </div>
+          <div>
+            <div class="section-title">If they react this way…</div>
+            <div class="hint">Click a reaction on the left to populate this.</div>
+            <textarea id="reactionText" class="script-display" readonly></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">Role-specific angle</div>
+          <div id="roleNote" class="role-note"></div>
+        </div>
+
+        <div style="margin-top: 8px;">
+          <div class="section-title">First 60 seconds – follow-up questions</div>
+          <div class="hint">Tap a question after you’ve used it to mark it off.</div>
+          <ol id="followupList" class="followup-list"></ol>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="section-title">Quick mode chips</div>
+          <div class="hint">Use these pre-sets to update controls fast.</div>
+          <div class="chips">
+            <button class="chip" type="button" data-preset="cmoDiscovery">CMO discovery</button>
+            <button class="chip" type="button" data-preset="vpRushed">VP, rushed</button>
+            <button class="chip" type="button" data-preset="opsDeep">Ops / RevOps deep dive</button>
+            <button class="chip" type="button" data-preset="microDial">High-volume micro opener</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- SCRIPT DATA ---
+
+    const openers = {
+      // Option 1: Clarity / visibility
+      clarity: {
+        standard: `[Prospect], it’s Andrew Apodaca — I know you weren’t expecting my call, I’ll be brief.
+
+I spend a lot of time with marketing teams navigating everything from inconsistent reporting to questions around what’s actually moving the needle.
+
+Rather than guessing, could I ask: how are you approaching visibility and clarity right now inside your marketing org?`,
+
+        rushed: `[Prospect], it’s Andrew with Certatude — sounds like you’re in the middle of something, so I’ll keep this to one quick question.
+
+I work with marketing teams on visibility into what’s actually driving pipeline. Would you say you have that clarity today, or are there still some blind spots you’re working through?`,
+
+        micro: `[Prospect], it’s Andrew with Certatude. I know this is out of the blue — I help marketing teams get clearer on what’s really driving revenue without changing tools.
+
+Would it be okay if I ask you one quick question?`
+      },
+
+      // Option 3: Performance / focus
+      performance: {
+        standard: `[Prospect], Andrew Apodaca here — thanks for taking a second.
+
+I work with marketing leaders who want to get sharper on where performance is truly coming from, without adding more complexity.
+
+When you think about improving marketing performance going into next quarter, where are you placing the most focus?`,
+
+        rushed: `[Prospect], it’s Andrew with Certatude — appreciate you picking up, I’ll keep this really quick.
+
+I usually help leaders who want clearer line-of-sight into what’s actually driving performance. If you had to pick just one area you’d love to tighten up next quarter, where would that be?`,
+
+        micro: `[Prospect], it’s Andrew with Certatude. I’ll be brief — I help marketing leaders get a cleaner view of what’s actually driving results in their mix.
+
+Can I ask you one quick question on how you’re approaching that today?`
+      }
+    };
+
+    const roleNotes = {
+      generic: `Keep it neutral. Focus on clarity, performance, and decision-making support — not tools or tactics.`,
+      cmo: `CMO angle: emphasize board/exec visibility, confidence in what’s driving growth, and avoiding extra complexity or headcount.`,
+      vp: `VP Marketing / Growth angle: highlight campaign performance, pipeline impact, and making faster, cleaner calls on where to invest.`,
+      ops: `Marketing Ops / RevOps angle: lean into data alignment across platforms, reporting speed, and trust in the numbers.`,
+      demand: `Demand Gen angle: talk about channel mix, campaign lift, and understanding which levers are really moving pipeline and revenue.`
+    };
+
+    const followUps = [
+      `How are you currently tracking marketing performance across your main channels today?`,
+      `What’s working well with your stack right now, and what still feels messy or slow when you need answers?`,
+      `When you have to explain “what drove this quarter’s results” to leadership, what do you usually rely on?`,
+      `Where do you feel the biggest friction today — reporting speed, confidence in the data, or connecting marketing to revenue?`,
+      `If you could snap your fingers and improve one part of your visibility or performance story, what would you change first?`
+    ];
+
+    const reactions = {
+      open: `Nice — that’s exactly what I was hoping to learn.
+
+Sounds like this is already on your radar. Just to make this useful for you, where are you finding it hardest right now: getting clean data, agreeing on what to measure, or turning the insights into real decisions?`,
+
+      busy: `Totally fair — I really appreciate you telling me.
+
+How about this: I’ll ask you one quick question now, and if it’s not relevant, we can both bail out. If it *is* relevant, we can find 15 minutes on your terms later. Does that work?`,
+
+      fine: `Good to hear things are working reasonably well.
+
+When teams tell me that, it’s often still because there are one or two areas that feel fuzzy under the surface. If you had to pick one area where you’re “fine but not thrilled” on the analytics or ROI side, what would it be?`,
+
+      notnow: `Totally understand — timing is almost never perfect.
+
+Just so I don’t show up in your inbox with something off-base: when you do look at tightening up your marketing visibility or ROI story, what’s the trigger that usually makes it a priority for you?`
+    };
+
+    const presets = {
+      cmoDiscovery: {
+        role: 'cmo',
+        opener: 'clarity',
+        pace: 'standard'
+      },
+      vpRushed: {
+        role: 'vp',
+        opener: 'performance',
+        pace: 'rushed'
+      },
+      opsDeep: {
+        role: 'ops',
+        opener: 'clarity',
+        pace: 'standard'
+      },
+      microDial: {
+        role: 'generic',
+        opener: 'clarity',
+        pace: 'micro'
+      }
+    };
+
+    // --- DOM ELEMENTS ---
+    const roleSelect = document.getElementById('roleSelect');
+    const openerSelect = document.getElementById('openerSelect');
+    const paceSelect = document.getElementById('paceSelect');
+    const openerText = document.getElementById('openerText');
+    const reactionText = document.getElementById('reactionText');
+    const roleNote = document.getElementById('roleNote');
+    const followupList = document.getElementById('followupList');
+    const showAndrew = document.getElementById('showAndrew');
+    const showCompany = document.getElementById('showCompany');
+
+    const reactionButtons = document.querySelectorAll('.reaction-buttons button');
+    const presetChips = document.querySelectorAll('.chip');
+
+    // --- HELPERS ---
+
+    function buildOpener() {
+      const style = openerSelect.value;      // clarity or performance
+      const pace = paceSelect.value;        // standard, rushed, micro
+      let text = openers[style][pace];
+
+      // Apply name/company prefs
+      if (!showAndrew.checked) {
+        text = text.replace(/Andrew Apodaca/g, 'Andrew')
+                   .replace(/Andrew with Certatude/g, 'Andrew')
+                   .replace(/Andrew with/g, 'Andrew with'); // minimal change
+      }
+      if (!showCompany.checked) {
+        text = text.replace(/ with Certatude/g, '')
+                   .replace(/I usually help/g, 'I help')
+                   .replace(/I help marketing teams/g, 'I help marketing teams');
+      }
+
+      openerText.value = text;
+    }
+
+    function updateRoleNote() {
+      const role = roleSelect.value;
+      roleNote.textContent = roleNotes[role] || roleNotes.generic;
+    }
+
+    function renderFollowups() {
+      followupList.innerHTML = '';
+      followUps.forEach((q, idx) => {
+        const li = document.createElement('li');
+        li.textContent = q;
+        li.dataset.index = String(idx);
+        li.addEventListener('click', () => {
+          li.classList.toggle('used');
+        });
+        followupList.appendChild(li);
+      });
+    }
+
+    function clearReactionSelection() {
+      reactionButtons.forEach(btn => btn.classList.remove('active'));
+      reactionText.value = '';
+    }
+
+    function applyPreset(name) {
+      const preset = presets[name];
+      if (!preset) return;
+      roleSelect.value = preset.role;
+      openerSelect.value = preset.opener;
+      paceSelect.value = preset.pace;
+      buildOpener();
+      updateRoleNote();
+      clearReactionSelection();
+      presetChips.forEach(chip => chip.classList.remove('active'));
+      presetChips.forEach(chip => {
+        if (chip.dataset.preset === name) chip.classList.add('active');
+      });
+    }
+
+    // --- EVENT WIRING ---
+
+    openerSelect.addEventListener('change', () => {
+      buildOpener();
+      clearReactionSelection();
+    });
+
+    paceSelect.addEventListener('change', () => {
+      buildOpener();
+      clearReactionSelection();
+    });
+
+    roleSelect.addEventListener('change', () => {
+      updateRoleNote();
+    });
+
+    showAndrew.addEventListener('change', buildOpener);
+    showCompany.addEventListener('change', buildOpener);
+
+    reactionButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.reaction;
+        reactionButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        reactionText.value = reactions[key] || '';
+      });
+    });
+
+    presetChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        applyPreset(chip.dataset.preset);
+      });
+    });
+
+    // --- INITIALIZE ---
+    buildOpener();
+    updateRoleNote();
+    renderFollowups();
+  </script>
+</body>
+</html>
