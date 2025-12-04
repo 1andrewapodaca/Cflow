@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Call Flow Coach – Certatude Focus Mode</title>
+  <title>Certatude Call Flow Coach</title>
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -42,13 +42,14 @@
       margin: 0;
       font-size: 0.8rem;
       color: var(--text-muted);
+      font-style: italic; /* instruction */
     }
 
     /* Tabs */
     .tabs {
       display: flex;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .tab {
       flex: 0 0 auto;
@@ -63,6 +64,46 @@
     .tab.active {
       background: var(--accent);
       color: #FFFFFF;
+      border-color: var(--accent-warm); /* orange accent for active */
+      box-shadow: 0 0 0 1px rgba(206,159,63,0.35);
+    }
+
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+    }
+    .timer-label {
+      font-style: italic;
+      color: var(--text-muted);
+    }
+    .timer-label strong {
+      font-weight: 600;
+    }
+    .timer {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .timer-display {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+    .timer button {
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
+      color: var(--text-main);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    .timer button:hover {
       border-color: var(--accent);
     }
 
@@ -88,6 +129,7 @@
       font-size: 0.8rem;
       margin-bottom: 4px;
       color: var(--text-muted);
+      font-style: italic; /* instructions */
     }
     select, input[type="text"] {
       width: 100%;
@@ -118,6 +160,7 @@
       font-size: 0.78rem;
       color: var(--text-main);
       cursor: pointer;
+      font-style: normal;
     }
 
     .primary-btn {
@@ -139,6 +182,7 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-bottom: 4px;
+      font-style: italic; /* instructions */
     }
 
     /* Live view core */
@@ -179,35 +223,11 @@
     .live-mode-toggle button.active[data-mode="conversation"] {
       background: var(--accent);
       color: #FFFFFF;
+      border-right: 1px solid rgba(255,255,255,0.2);
     }
     .live-mode-toggle button.active[data-mode="voicemail"] {
       background: var(--accent-soft);
       color: #FFFFFF;
-    }
-
-    .timer {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .timer-display {
-      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.9rem;
-      color: var(--text-main);
-    }
-    .timer button {
-      border-radius: 999px;
-      border: 1px solid var(--border-strong);
-      background: #FFFFFF;
-      color: var(--text-main);
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      cursor: pointer;
-    }
-    .timer button:hover {
-      border-color: var(--accent);
     }
 
     .panels-btn {
@@ -225,35 +245,6 @@
     }
     .panels-btn span.caret {
       font-size: 0.6rem;
-    }
-    .panels-menu {
-      position: absolute;
-      right: 0;
-      top: 115%;
-      background: #FFFFFF;
-      border-radius: 10px;
-      border: 1px solid var(--border-strong);
-      padding: 4px 0;
-      min-width: 190px;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.15);
-      z-index: 20;
-      display: none;
-    }
-    .panels-menu.open {
-      display: block;
-    }
-    .panels-menu button {
-      width: 100%;
-      padding: 6px 12px;
-      background: transparent;
-      border: none;
-      color: var(--text-main);
-      text-align: left;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-    .panels-menu button:hover {
-      background: #F3F4F6;
     }
 
     .opener-block {
@@ -274,15 +265,31 @@
       color: var(--text-main);
       white-space: pre-wrap;
     }
+    .opener-box.active-step {
+      border-color: var(--accent-warm);
+      box-shadow: 0 0 0 1px rgba(206,159,63,0.35);
+    }
 
     .reaction-section {
       margin-top: 4px;
     }
+    .reaction-section.active-step {
+      border: 1px solid var(--accent-warm);
+      border-radius: 10px;
+      padding: 4px 6px 6px;
+      background: #FFFBEB;
+    }
+
     .reaction-label {
       font-size: 0.8rem;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-main);
-      margin-bottom: 4px;
+    }
+    .reaction-label span {
+      font-size: 0.75rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-muted);
     }
     .reaction-buttons {
       display: flex;
@@ -303,9 +310,9 @@
       border-color: var(--accent);
     }
     .reaction-buttons button.active {
-      border-color: var(--accent);
-      background: #E0E7FF;
-      box-shadow: 0 0 0 1px rgba(47,49,141,0.15);
+      border-color: var(--accent-warm);
+      background: #FFF7ED;
+      box-shadow: 0 0 0 1px rgba(206,159,63,0.35);
     }
 
     .response-card {
@@ -314,16 +321,11 @@
       border: 1px solid var(--border-strong);
       background: #FFFFFF;
       padding: 10px 11px;
-      min-height: 80px;
+      min-height: 60px;
       font-size: 0.9rem;
       line-height: 1.4;
       color: var(--text-main);
       box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    }
-    .response-placeholder {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      font-style: italic;
     }
 
     /* Slide-out panels */
@@ -386,6 +388,7 @@
       font-size: 0.72rem;
       color: var(--text-muted);
       margin-bottom: 3px;
+      font-style: italic;
     }
     .side-panel input[type="text"],
     .side-panel textarea {
@@ -457,8 +460,8 @@
 <body>
   <div class="app">
     <header>
-      <h1>Call Flow Coach – Certatude</h1>
-      <p>Setup before you dial, then switch to Live mode for a clean, distraction-free call flow with optional panels and voicemail mode.</p>
+      <h1>Certatude Call Flow Coach</h1>
+      <p><strong>Use this in three steps:</strong> <em>set up before you dial, switch to Live once you connect, then open panels only when you need deeper notes.</em></p>
     </header>
 
     <div class="tabs">
@@ -467,10 +470,18 @@
       <button class="tab" data-view="toolsView">Tools</button>
     </div>
 
-    <!-- SETUP VIEW -->
+    <div class="timer-bar">
+      <span class="timer-label"><strong>When you connect:</strong> <em>start the timer so you stay aware of your first 60–90 seconds.</em></span>
+      <div class="timer">
+        <span class="timer-display" id="timerDisplay">00:00</span>
+        <button id="timerStartPause" type="button">Start</button>
+        <button id="timerReset" type="button">Reset</button>
+      </div>
+    </div>
+
     <div id="setupView" class="view active">
       <div class="panel">
-        <label for="roleSelect">Who are you calling?</label>
+        <label for="roleSelect"><strong>Choose who you’re calling</strong> – <em>this shapes angle and questions.</em></label>
         <select id="roleSelect">
           <option value="generic">Generic marketing leader</option>
           <option value="cmo">CMO / SVP Marketing</option>
@@ -479,7 +490,7 @@
           <option value="demand">Director Demand Gen / Performance</option>
         </select>
 
-        <label for="openerSelect">How do you want to open?</label>
+        <label for="openerSelect"><strong>Select your opener style</strong> – <em>clarity, ROI, or performance.</em></label>
         <select id="openerSelect">
           <option value="clarity">Option 1 – Clarity / Visibility</option>
           <option value="roi">Option 2 – ROI / Results</option>
@@ -491,17 +502,16 @@
           <label><input type="checkbox" id="showCompany" checked /> Mention Certatude lightly</label>
         </div>
 
-        <label for="prospectName" style="margin-top:8px;">Prospect name (optional)</label>
+        <label for="prospectName" style="margin-top:8px;"><strong>Optional:</strong> <em>add prospect name to personalize.</em></label>
         <input type="text" id="prospectName" placeholder="e.g., Claire">
 
-        <label for="companyName">Company (optional)</label>
+        <label for="companyName"><strong>Optional:</strong> <em>add company name for your own reference.</em></label>
         <input type="text" id="companyName" placeholder="e.g., Acme SaaS">
 
-        <button id="goLiveBtn" class="primary-btn" type="button">Go to Live mode</button>
+        <button id="goLiveBtn" class="primary-btn" type="button"><strong>Go to Live mode</strong></button>
       </div>
     </div>
 
-    <!-- LIVE VIEW -->
     <div id="liveView" class="view">
       <div class="panel">
         <div class="live-header">
@@ -511,57 +521,43 @@
               <button type="button" data-mode="conversation" class="active">Conversation</button>
               <button type="button" data-mode="voicemail">Voicemail</button>
             </div>
-            <div class="timer">
-              <span class="timer-display" id="timerDisplay">00:00</span>
-              <button id="timerStartPause" type="button">Start</button>
-              <button id="timerReset" type="button">Reset</button>
-            </div>
           </div>
           <div class="live-right">
             <button id="panelsBtn" class="panels-btn" type="button">
               <span>Panels</span><span class="caret">▾</span>
             </button>
-            <div id="panelsMenu" class="panels-menu">
-              <button type="button" data-panel-action="left">Quick reference (left)</button>
-              <button type="button" data-panel-action="right">Insights & discovery (right)</button>
-              <button type="button" data-panel-action="hide">Hide all panels</button>
-            </div>
           </div>
         </div>
 
         <div class="opener-block">
-          <div class="hint" id="openerHint">Glance once, then use your own voice. [Prospect] = their name.</div>
+          <div class="hint" id="openerHint"></div>
           <div id="openerBox" class="opener-box"></div>
         </div>
 
         <div id="reactionSection" class="reaction-section">
-          <div class="reaction-label">Their reaction</div>
-          <div class="hint">Tap what you hear; the suggested next line will appear below.</div>
+          <div class="reaction-label">PROSPECT reaction <span>(<strong>tap what you hear</strong> to see your next line.)</span></div>
+          <div class="hint"><strong>During the first response:</strong> <em>tap one of the buttons below that best matches their tone.</em></div>
           <div class="reaction-buttons">
             <button type="button" data-reaction="open">Open / curious</button>
             <button type="button" data-reaction="busy">Busy / time-pressed</button>
             <button type="button" data-reaction="fine">“We’re fine / covered”</button>
             <button type="button" data-reaction="notnow">“Not a priority now”</button>
           </div>
-          <div id="responseCard" class="response-card">
-            <div class="response-placeholder">Once they respond, tap a reaction above to see a suggested line.</div>
-          </div>
+          <div id="responseCard" class="response-card"></div>
         </div>
       </div>
     </div>
 
-    <!-- TOOLS VIEW -->
     <div id="toolsView" class="view">
       <div class="panel">
         <div class="tools-body">
-          <p><strong>Tools & reference</strong></p>
+          <p><strong>Reference library:</strong> <em>use this tab later to store alternate openers or agency-specific versions.</em></p>
           <p>This area can hold:</p>
           <ul>
-            <li>Alternate opener variants (e.g., SaaS-specific, agency-specific)</li>
-            <li>Additional voicemail variations</li>
-            <li>Personal notes or tweaks you want to keep handy</li>
+            <li>Alternate opener variants (e.g., SaaS, agency, partner-led)</li>
+            <li>Additional voicemail patterns</li>
+            <li>Personal tweaks you want to re-use</li>
           </ul>
-          <p>For now, Live mode is your primary workspace. Treat this tab as an optional library to expand later.</p>
         </div>
       </div>
     </div>
@@ -575,13 +571,13 @@
     </div>
     <div>
       <div class="side-panel-section-title">Prospect</div>
-      <div class="side-panel-hint">Keep names and company top-of-mind.</div>
+      <div class="side-panel-hint">*Keep names and company top-of-mind so your opener feels grounded.*</div>
       <input type="text" id="leftProspectName" placeholder="Prospect name" />
       <input type="text" id="leftCompanyName" placeholder="Company" />
     </div>
     <div>
       <div class="side-panel-section-title">Quick notes</div>
-      <div class="side-panel-hint">One or two anchor points for what matters to them.</div>
+      <div class="side-panel-hint">*Capture one or two anchors (e.g., attribution clarity, Q1 pipeline, AI expectations).* </div>
       <textarea id="leftQuickNotes" placeholder="e.g., attribution clarity, Q1 pipeline, AI expectations..."></textarea>
     </div>
   </div>
@@ -598,12 +594,12 @@
     </div>
     <div>
       <div class="side-panel-section-title">Discovery questions</div>
-      <div class="side-panel-hint">Tap a question after you use it to mark it off.</div>
+      <div class="side-panel-hint">*Tap a question after you use it to mark it off and avoid repeating yourself.*</div>
       <ol id="followupList" class="side-panel-list"></ol>
     </div>
     <div>
       <div class="side-panel-section-title">Call notes</div>
-      <div class="side-panel-hint">Capture key lines or phrases in their language.</div>
+      <div class="side-panel-hint">*Capture key phrases in their language for follow-ups and emails.*</div>
       <textarea id="rightNotes" placeholder="e.g., 'Biggest pain: no unified view of paid & organic'"></textarea>
     </div>
   </div>
@@ -631,7 +627,6 @@ I work with marketing leaders who are looking to get sharper on where performanc
 When you think about improving marketing performance going into next quarter, where are you placing the most focus?`
     };
 
-    // Voicemail variants aligned with the opener styles
     const voicemailOpeners = {
       clarity: `Hi [Prospect], it’s Andrew Apodaca calling.
 
@@ -705,7 +700,6 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     const responseCard = document.getElementById('responseCard');
 
     const panelsBtn = document.getElementById('panelsBtn');
-    const panelsMenu = document.getElementById('panelsMenu');
 
     const leftPanel = document.getElementById('leftPanel');
     const rightPanel = document.getElementById('rightPanel');
@@ -724,7 +718,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     const timerReset = document.getElementById('timerReset');
 
     // --- STATE ---
-    let currentMode = 'conversation'; // 'conversation' or 'voicemail'
+    let currentMode = 'conversation';
     let timerSeconds = 0;
     let timerInterval = null;
 
@@ -787,6 +781,13 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     timerReset.addEventListener('click', resetTimer);
 
+    // --- ACTIVE STEP HIGHLIGHT ---
+
+    function setActiveStep(step) {
+      openerBox.classList.toggle('active-step', step === 'opener');
+      reactionSection.classList.toggle('active-step', step === 'reaction');
+    }
+
     // --- OPENER BUILDING ---
 
     function getBaseTextForMode() {
@@ -836,11 +837,15 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
       // Update hint & reaction visibility based on mode
       if (currentMode === 'conversation') {
-        openerHint.textContent = 'Glance once, then use your own voice. [Prospect] = their name.';
+        openerHint.innerHTML =
+          '<strong>Read it once, then look away:</strong> <em>use your own voice; [Prospect] is their name.</em>';
         reactionSection.style.display = 'block';
+        setActiveStep('opener');
       } else {
-        openerHint.textContent = 'Short, confident voicemail. Feel free to adjust phrasing so it sounds like you.';
+        openerHint.innerHTML =
+          '<strong>Keep the voicemail clean and brief:</strong> <em>tweak the wording so it sounds like you.</em>';
         reactionSection.style.display = 'none';
+        setActiveStep('opener');
       }
     }
 
@@ -864,7 +869,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     function clearReactionSelection() {
       reactionButtons.forEach(btn => btn.classList.remove('active'));
-      responseCard.innerHTML = '<div class="response-placeholder">Once they respond, tap a reaction above to see a suggested line.</div>';
+      responseCard.textContent = ''; // no repetitive instructions
     }
 
     // --- EVENTS: SETUP ---
@@ -889,6 +894,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
       clearReactionSelection();
       resetTimer();
       switchView('liveView');
+      setActiveStep('opener');
     });
 
     // --- EVENTS: LIVE REACTIONS ---
@@ -899,6 +905,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
         reactionButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         responseCard.textContent = reactions[key] || '';
+        setActiveStep('reaction');
       });
     });
 
@@ -916,30 +923,18 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
       });
     });
 
-    // --- PANELS MENU & SIDE PANELS ---
+    // --- PANELS BUTTON (TOGGLE BOTH SIDES) ---
 
-    panelsBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      panelsMenu.classList.toggle('open');
-    });
-
-    document.addEventListener('click', () => {
-      panelsMenu.classList.remove('open');
-    });
-
-    panelsMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const action = e.target.dataset.panelAction;
-      if (!action) return;
-      panelsMenu.classList.remove('open');
-
-      if (action === 'left') {
-        leftPanel.classList.toggle('open');
-      } else if (action === 'right') {
-        rightPanel.classList.toggle('open');
-      } else if (action === 'hide') {
+    panelsBtn.addEventListener('click', () => {
+      const anyOpen =
+        leftPanel.classList.contains('open') ||
+        rightPanel.classList.contains('open');
+      if (anyOpen) {
         leftPanel.classList.remove('open');
         rightPanel.classList.remove('open');
+      } else {
+        leftPanel.classList.add('open');
+        rightPanel.classList.add('open');
       }
     });
 
@@ -956,6 +951,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     // --- INITIAL STATE ---
     updateTimerDisplay();
+    clearReactionSelection();
   </script>
 </body>
 </html>
