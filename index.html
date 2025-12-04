@@ -1,20 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Call Flow Coach – V2 Focus Mode + Voicemail</title>
+  <title>Call Flow Coach – Certatude Focus Mode</title>
   <style>
     * { box-sizing: border-box; }
     :root {
-      --bg: #020617;
-      --bg-elevated: #020617;
-      --border-subtle: #111827;
-      --border-strong: #1f2937;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --accent: #818cf8;
-      --accent-soft: #4f46e5;
+      --bg: #F3F4F6;              /* light app background */
+      --bg-elevated: #FFFFFF;     /* cards/panels */
+      --border-subtle: #E5E7EB;
+      --border-strong: #D1D5DB;
+      --text-main: #4D5859;       /* brand dark grey */
+      --text-muted: #6B7280;
+      --accent: #2F318D;          /* brand blue */
+      --accent-soft: #9747FF;     /* brand purple */
+      --accent-warm: #CE9F3F;     /* brand orange */
     }
     body {
       margin: 0;
@@ -36,6 +36,7 @@
       margin: 0 0 4px;
       font-size: 1.25rem;
       letter-spacing: 0.01em;
+      color: var(--accent);
     }
     header p {
       margin: 0;
@@ -54,14 +55,14 @@
       padding: 6px 14px;
       border-radius: 999px;
       border: 1px solid var(--border-strong);
-      background: #020617;
-      color: var(--text-muted);
+      background: #F9FAFB;
+      color: var(--text-main);
       font-size: 0.8rem;
       cursor: pointer;
     }
     .tab.active {
-      background: #111827;
-      color: var(--text-main);
+      background: var(--accent);
+      color: #FFFFFF;
       border-color: var(--accent);
     }
 
@@ -79,6 +80,7 @@
       border: 1px solid var(--border-strong);
       padding: 12px 14px 14px;
       overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
     }
 
     label {
@@ -91,12 +93,18 @@
       width: 100%;
       padding: 7px 9px;
       border-radius: 8px;
-      border: 1px solid #4b5563;
-      background: #020617;
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
       color: var(--text-main);
       font-size: 0.9rem;
       margin-bottom: 10px;
     }
+    select:focus, input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(47,49,141,0.15);
+    }
+
     .toggle-row {
       display: flex;
       flex-direction: column;
@@ -108,7 +116,7 @@
       align-items: center;
       gap: 6px;
       font-size: 0.78rem;
-      color: #cbd5f5;
+      color: var(--text-main);
       cursor: pointer;
     }
 
@@ -116,19 +124,20 @@
       margin-top: 8px;
       padding: 7px 14px;
       border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #111827;
-      color: var(--text-main);
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #FFFFFF;
       font-size: 0.82rem;
       cursor: pointer;
     }
     .primary-btn:hover {
-      border-color: var(--accent);
+      background: #1f256a;
+      border-color: #1f256a;
     }
 
     .hint {
       font-size: 0.75rem;
-      color: #6b7280;
+      color: var(--text-muted);
       margin-bottom: 4px;
     }
 
@@ -144,17 +153,20 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .live-title {
       font-size: 0.9rem;
       font-weight: 600;
+      color: var(--accent);
     }
 
     .live-mode-toggle {
       display: inline-flex;
       border-radius: 999px;
-      border: 1px solid #374151;
+      border: 1px solid var(--border-strong);
       overflow: hidden;
+      background: #F9FAFB;
     }
     .live-mode-toggle button {
       padding: 3px 10px;
@@ -164,9 +176,13 @@
       font-size: 0.76rem;
       cursor: pointer;
     }
-    .live-mode-toggle button.active {
-      background: #111827;
-      color: var(--text-main);
+    .live-mode-toggle button.active[data-mode="conversation"] {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+    .live-mode-toggle button.active[data-mode="voicemail"] {
+      background: var(--accent-soft);
+      color: #FFFFFF;
     }
 
     .timer {
@@ -183,8 +199,8 @@
     }
     .timer button {
       border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #020617;
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
       color: var(--text-main);
       font-size: 0.7rem;
       padding: 2px 8px;
@@ -198,8 +214,8 @@
       position: relative;
       padding: 5px 12px;
       border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
       color: var(--text-main);
       font-size: 0.78rem;
       cursor: pointer;
@@ -214,13 +230,12 @@
       position: absolute;
       right: 0;
       top: 115%;
-      background: rgba(15,23,42,0.96);
-      backdrop-filter: blur(10px);
+      background: #FFFFFF;
       border-radius: 10px;
       border: 1px solid var(--border-strong);
       padding: 4px 0;
-      min-width: 180px;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+      min-width: 190px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.15);
       z-index: 20;
       display: none;
     }
@@ -238,7 +253,7 @@
       cursor: pointer;
     }
     .panels-menu button:hover {
-      background: #111827;
+      background: #F3F4F6;
     }
 
     .opener-block {
@@ -250,8 +265,10 @@
       min-height: 120px;
       padding: 12px 14px;
       border-radius: 12px;
-      border: 1px solid #374151;
-      background: radial-gradient(circle at top left, rgba(79,70,229,0.08), transparent 60%), #020617;
+      border: 1px solid var(--border-strong);
+      background:
+        linear-gradient(135deg, rgba(47,49,141,0.05), transparent 55%),
+        #FFFFFF;
       font-size: 0.96rem;
       line-height: 1.5;
       color: var(--text-main);
@@ -264,6 +281,7 @@
     .reaction-label {
       font-size: 0.8rem;
       font-weight: 500;
+      color: var(--text-main);
       margin-bottom: 4px;
     }
     .reaction-buttons {
@@ -275,8 +293,8 @@
     .reaction-buttons button {
       padding: 5px 11px;
       border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #020617;
+      border: 1px solid var(--border-strong);
+      background: #F9FAFB;
       color: var(--text-main);
       font-size: 0.78rem;
       cursor: pointer;
@@ -286,24 +304,24 @@
     }
     .reaction-buttons button.active {
       border-color: var(--accent);
-      background: #111827;
-      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+      background: #E0E7FF;
+      box-shadow: 0 0 0 1px rgba(47,49,141,0.15);
     }
 
     .response-card {
       margin-top: 2px;
       border-radius: 10px;
-      border: 1px solid #374151;
-      background: rgba(15,23,42,0.98);
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
       padding: 10px 11px;
       min-height: 80px;
       font-size: 0.9rem;
       line-height: 1.4;
       color: var(--text-main);
-      box-shadow: 0 16px 45px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     }
     .response-placeholder {
-      color: #6b7280;
+      color: var(--text-muted);
       font-size: 0.8rem;
       font-style: italic;
     }
@@ -314,11 +332,10 @@
       top: 16px;
       bottom: 16px;
       width: 260px;
-      background: rgba(15,23,42,0.98);
-      backdrop-filter: blur(14px);
+      background: #FFFFFF;
       border-radius: 16px;
-      border: 1px solid #1f2937;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
       padding: 10px 12px 12px;
       z-index: 30;
       display: flex;
@@ -349,6 +366,7 @@
     .side-panel-title {
       font-size: 0.85rem;
       font-weight: 600;
+      color: var(--accent);
     }
     .side-panel-close {
       border: none;
@@ -362,6 +380,7 @@
       font-weight: 600;
       margin-top: 2px;
       margin-bottom: 2px;
+      color: var(--text-main);
     }
     .side-panel-hint {
       font-size: 0.72rem;
@@ -372,8 +391,8 @@
     .side-panel textarea {
       width: 100%;
       border-radius: 8px;
-      border: 1px solid #4b5563;
-      background: rgba(15,23,42,0.95);
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
       color: var(--text-main);
       font-size: 0.8rem;
       padding: 6px 8px;
@@ -385,12 +404,12 @@
     }
     .side-panel-role-note {
       font-size: 0.78rem;
-      color: var(--text-muted);
+      color: var(--text-main);
       margin-bottom: 4px;
       padding: 4px 6px;
       border-radius: 8px;
-      border: 1px solid #374151;
-      background: rgba(15,23,42,0.8);
+      border: 1px solid var(--border-strong);
+      background: #F9FAFF;
     }
     .side-panel-list {
       list-style: decimal;
@@ -401,9 +420,10 @@
       font-size: 0.78rem;
       margin-bottom: 3px;
       cursor: pointer;
+      color: var(--text-main);
     }
     .side-panel-list li.used {
-      color: #6b7280;
+      color: var(--text-muted);
       text-decoration: line-through;
     }
 
@@ -437,7 +457,7 @@
 <body>
   <div class="app">
     <header>
-      <h1>Call Flow Coach – Focus Mode</h1>
+      <h1>Call Flow Coach – Certatude</h1>
       <p>Setup before you dial, then switch to Live mode for a clean, distraction-free call flow with optional panels and voicemail mode.</p>
     </header>
 
@@ -462,6 +482,7 @@
         <label for="openerSelect">How do you want to open?</label>
         <select id="openerSelect">
           <option value="clarity">Option 1 – Clarity / Visibility</option>
+          <option value="roi">Option 2 – ROI / Results</option>
           <option value="performance" selected>Option 3 – Performance / Focus</option>
         </select>
 
@@ -597,6 +618,12 @@ I spend a lot of time with marketing teams navigating everything from inconsiste
 
 Rather than guessing, could I ask: how are you approaching visibility and clarity right now inside your marketing org?`,
 
+      roi: `[Prospect], Andrew Apodaca here — I’ll keep this quick.
+
+I spend a lot of time with teams who want higher confidence that their marketing dollars are actually producing the right results — without adding more noise or more tools.
+
+When you think about improving ROI or tightening the connection between marketing and revenue, where do you personally feel the most pressure today?`,
+
       performance: `[Prospect], Andrew Apodaca here — thanks for taking a second.
 
 I work with marketing leaders who are looking to get sharper on where performance is truly coming from, without adding more complexity.
@@ -604,13 +631,19 @@ I work with marketing leaders who are looking to get sharper on where performanc
 When you think about improving marketing performance going into next quarter, where are you placing the most focus?`
     };
 
-    // Voicemail variants aligned with the two opener styles
+    // Voicemail variants aligned with the opener styles
     const voicemailOpeners = {
       clarity: `Hi [Prospect], it’s Andrew Apodaca calling.
 
 I work with marketing teams on getting a clearer view of what’s actually driving results, especially when attribution and reporting are sending mixed signals.
 
-No need to call back urgently — I’ll also send a quick note with a bit more context. If tightening up visibility around what’s really moving the needle is on your radar, feel free to reply or grab time that works best for you.`,
+No need to call back urgently — I’ll also send a quick note with a bit more context. If tightening up visibility around what’s really moving the needle is on your radar, feel free to reply or grab time that works for you.`,
+
+      roi: `Hi [Prospect], it’s Andrew Apodaca.
+
+I work with marketing teams who want stronger clarity on which parts of their marketing mix are actually driving results — without adding more tools or more reporting overhead.
+
+I’ll send a short follow-up note, but if increasing ROI or improving confidence in the numbers is something you’re exploring, feel free to reply or book time that works for you.`,
 
       performance: `Hi [Prospect], it’s Andrew Apodaca.
 
@@ -922,7 +955,6 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     rightPanel.addEventListener('click', e => e.stopPropagation());
 
     // --- INITIAL STATE ---
-    // Start in setup view. Timer at 00:00. Opener is built when going live.
     updateTimerDisplay();
   </script>
 </body>
