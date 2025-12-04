@@ -42,7 +42,7 @@
       margin: 0;
       font-size: 0.8rem;
       color: var(--text-muted);
-      font-style: italic; /* instruction */
+      font-style: italic;
     }
 
     /* Tabs */
@@ -64,23 +64,16 @@
     .tab.active {
       background: var(--accent);
       color: #FFFFFF;
-      border-color: var(--accent-warm); /* orange accent for active */
+      border-color: var(--accent-warm);
       box-shadow: 0 0 0 1px rgba(206,159,63,0.35);
     }
 
+    /* Timer bar (no instructions) */
     .timer-bar {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      justify-content: flex-end;
       margin-bottom: 10px;
       font-size: 0.8rem;
-    }
-    .timer-label {
-      font-style: italic;
-      color: var(--text-muted);
-    }
-    .timer-label strong {
-      font-weight: 600;
     }
     .timer {
       font-size: 0.8rem;
@@ -129,7 +122,7 @@
       font-size: 0.8rem;
       margin-bottom: 4px;
       color: var(--text-muted);
-      font-style: italic; /* instructions */
+      font-style: italic;
     }
     select, input[type="text"] {
       width: 100%;
@@ -182,10 +175,20 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-bottom: 4px;
-      font-style: italic; /* instructions */
+      font-style: italic;
     }
 
-    /* Live view core */
+    /* Live layout: main + side panel */
+    .live-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .live-main {
+      flex: 1 1 auto;
+    }
+
+    /* Live header */
     .live-header {
       display: flex;
       align-items: center;
@@ -285,17 +288,12 @@
       font-weight: 600;
       color: var(--text-main);
     }
-    .reaction-label span {
-      font-size: 0.75rem;
-      font-weight: 400;
-      font-style: italic;
-      color: var(--text-muted);
-    }
     .reaction-buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 6px;
+      margin-top: 2px;
     }
     .reaction-buttons button {
       padding: 5px 11px;
@@ -328,35 +326,20 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     }
 
-    /* Slide-out panels */
-    .side-panel {
-      position: fixed;
-      top: 16px;
-      bottom: 16px;
+    /* INLINE SIDE PANEL (right) */
+    .side-panel-inline {
       width: 260px;
       background: #FFFFFF;
       border-radius: 16px;
       border: 1px solid var(--border-strong);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
       padding: 10px 12px 12px;
-      z-index: 30;
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 6px;
-      transform: translateX(-120%);
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.22s cubic-bezier(0.4,0.0,0.2,1), opacity 0.18s ease-out;
     }
-    .side-panel.right {
-      right: 16px;
-      left: auto;
-      transform: translateX(120%);
-    }
-    .side-panel.open {
-      transform: translateX(0);
-      opacity: 1;
-      pointer-events: auto;
+    .side-panel-inline.open {
+      display: flex;
     }
     .side-panel-header {
       display: flex;
@@ -377,6 +360,35 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
+
+    .panel-tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      overflow: hidden;
+      background: #F9FAFB;
+      margin-bottom: 6px;
+    }
+    .panel-tab-btn {
+      padding: 4px 10px;
+      border: none;
+      background: transparent;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .panel-tab-btn.active {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .panel-tab-content {
+      display: none;
+    }
+    .panel-tab-content.active {
+      display: block;
+    }
+
     .side-panel-section-title {
       font-size: 0.78rem;
       font-weight: 600;
@@ -390,8 +402,8 @@
       margin-bottom: 3px;
       font-style: italic;
     }
-    .side-panel input[type="text"],
-    .side-panel textarea {
+    .side-panel-inline input[type="text"],
+    .side-panel-inline textarea {
       width: 100%;
       border-radius: 8px;
       border: 1px solid var(--border-strong);
@@ -400,7 +412,7 @@
       font-size: 0.8rem;
       padding: 6px 8px;
     }
-    .side-panel textarea {
+    .side-panel-inline textarea {
       resize: vertical;
       min-height: 60px;
       line-height: 1.4;
@@ -445,14 +457,17 @@
       margin-bottom: 2px;
     }
 
+    @media (max-width: 900px) {
+      .live-layout {
+        flex-direction: column;
+      }
+      .side-panel-inline {
+        width: 100%;
+      }
+    }
     @media (max-width: 720px) {
       .app {
         padding: 10px;
-      }
-      .side-panel {
-        top: 10px;
-        bottom: 10px;
-        width: 82%;
       }
     }
   </style>
@@ -461,7 +476,7 @@
   <div class="app">
     <header>
       <h1>Certatude Call Flow Coach</h1>
-      <p><strong>Use this in three steps:</strong> <em>set up before you dial, switch to Live once you connect, then open panels only when you need deeper notes.</em></p>
+      <p><strong>Use this in three steps:</strong> <em>set up before you dial, switch to Live once you connect, then open Panels only when you need more detail.</em></p>
     </header>
 
     <div class="tabs">
@@ -471,7 +486,6 @@
     </div>
 
     <div class="timer-bar">
-      <span class="timer-label"><strong>When you connect:</strong> <em>start the timer so you stay aware of your first 60–90 seconds.</em></span>
       <div class="timer">
         <span class="timer-display" id="timerDisplay">00:00</span>
         <button id="timerStartPause" type="button">Start</button>
@@ -479,6 +493,7 @@
       </div>
     </div>
 
+    <!-- SETUP VIEW -->
     <div id="setupView" class="view active">
       <div class="panel">
         <label for="roleSelect"><strong>Choose who you’re calling</strong> – <em>this shapes angle and questions.</em></label>
@@ -512,42 +527,91 @@
       </div>
     </div>
 
+    <!-- LIVE VIEW -->
     <div id="liveView" class="view">
-      <div class="panel">
-        <div class="live-header">
-          <div class="live-header-left">
-            <div class="live-title">Live</div>
-            <div class="live-mode-toggle">
-              <button type="button" data-mode="conversation" class="active">Conversation</button>
-              <button type="button" data-mode="voicemail">Voicemail</button>
+      <div class="live-layout">
+        <div class="panel live-main">
+          <div class="live-header">
+            <div class="live-header-left">
+              <div class="live-title">Live</div>
+              <div class="live-mode-toggle">
+                <button type="button" data-mode="conversation" class="active">Conversation</button>
+                <button type="button" data-mode="voicemail">Voicemail</button>
+              </div>
+            </div>
+            <div class="live-right">
+              <button id="panelsBtn" class="panels-btn" type="button">
+                <span>Panels</span><span class="caret">▾</span>
+              </button>
             </div>
           </div>
-          <div class="live-right">
-            <button id="panelsBtn" class="panels-btn" type="button">
-              <span>Panels</span><span class="caret">▾</span>
-            </button>
+
+          <div class="opener-block">
+            <div id="openerHint" class="hint"></div>
+            <div id="openerBox" class="opener-box"></div>
+          </div>
+
+          <div id="reactionSection" class="reaction-section">
+            <div class="reaction-label">Select Prospect Reaction</div>
+            <div class="reaction-buttons">
+              <button type="button" data-reaction="open">Open / curious</button>
+              <button type="button" data-reaction="busy">Busy / time-pressed</button>
+              <button type="button" data-reaction="fine">“We’re fine / covered”</button>
+              <button type="button" data-reaction="notnow">“Not a priority now”</button>
+            </div>
+            <div id="responseCard" class="response-card"></div>
           </div>
         </div>
 
-        <div class="opener-block">
-          <div class="hint" id="openerHint"></div>
-          <div id="openerBox" class="opener-box"></div>
-        </div>
-
-        <div id="reactionSection" class="reaction-section">
-          <div class="reaction-label">PROSPECT reaction <span>(<strong>tap what you hear</strong> to see your next line.)</span></div>
-          <div class="hint"><strong>During the first response:</strong> <em>tap one of the buttons below that best matches their tone.</em></div>
-          <div class="reaction-buttons">
-            <button type="button" data-reaction="open">Open / curious</button>
-            <button type="button" data-reaction="busy">Busy / time-pressed</button>
-            <button type="button" data-reaction="fine">“We’re fine / covered”</button>
-            <button type="button" data-reaction="notnow">“Not a priority now”</button>
+        <!-- Right-side inline panel with tabs -->
+        <div id="sidePanel" class="side-panel-inline">
+          <div class="side-panel-header">
+            <div class="side-panel-title">Panels</div>
+            <button class="side-panel-close" type="button">Close</button>
           </div>
-          <div id="responseCard" class="response-card"></div>
+
+          <div class="panel-tabs">
+            <button type="button" class="panel-tab-btn active" data-tab="quick">Quick reference</button>
+            <button type="button" class="panel-tab-btn" data-tab="insights">Insights / discovery</button>
+          </div>
+
+          <!-- Quick reference tab -->
+          <div id="panelQuick" class="panel-tab-content active">
+            <div>
+              <div class="side-panel-section-title">Prospect</div>
+              <div class="side-panel-hint">*Keep names and company top-of-mind so your opener feels grounded.*</div>
+              <input type="text" id="qrProspectName" placeholder="Prospect name" />
+              <input type="text" id="qrCompanyName" placeholder="Company" />
+            </div>
+            <div>
+              <div class="side-panel-section-title">Quick notes</div>
+              <div class="side-panel-hint">*Capture one or two anchors (e.g., attribution clarity, Q1 pipeline, AI expectations).* </div>
+              <textarea id="qrQuickNotes" placeholder="e.g., attribution clarity, Q1 pipeline, AI expectations..."></textarea>
+            </div>
+          </div>
+
+          <!-- Insights / discovery tab -->
+          <div id="panelInsights" class="panel-tab-content">
+            <div>
+              <div class="side-panel-section-title">Role angle</div>
+              <div id="roleNote" class="side-panel-role-note"></div>
+            </div>
+            <div>
+              <div class="side-panel-section-title">Discovery questions</div>
+              <div class="side-panel-hint">*Tap a question after you use it to mark it off and avoid repeating yourself.*</div>
+              <ol id="followupList" class="side-panel-list"></ol>
+            </div>
+            <div>
+              <div class="side-panel-section-title">Call notes</div>
+              <div class="side-panel-hint">*Capture key phrases in their language for follow-ups and emails.*</div>
+              <textarea id="rightNotes" placeholder="e.g., 'Biggest pain: no unified view of paid & organic'"></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- TOOLS VIEW -->
     <div id="toolsView" class="view">
       <div class="panel">
         <div class="tools-body">
@@ -560,47 +624,6 @@
           </ul>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- LEFT SIDE PANEL: Quick reference -->
-  <div id="leftPanel" class="side-panel">
-    <div class="side-panel-header">
-      <div class="side-panel-title">Quick reference</div>
-      <button class="side-panel-close" data-close="left" type="button">Close</button>
-    </div>
-    <div>
-      <div class="side-panel-section-title">Prospect</div>
-      <div class="side-panel-hint">*Keep names and company top-of-mind so your opener feels grounded.*</div>
-      <input type="text" id="leftProspectName" placeholder="Prospect name" />
-      <input type="text" id="leftCompanyName" placeholder="Company" />
-    </div>
-    <div>
-      <div class="side-panel-section-title">Quick notes</div>
-      <div class="side-panel-hint">*Capture one or two anchors (e.g., attribution clarity, Q1 pipeline, AI expectations).* </div>
-      <textarea id="leftQuickNotes" placeholder="e.g., attribution clarity, Q1 pipeline, AI expectations..."></textarea>
-    </div>
-  </div>
-
-  <!-- RIGHT SIDE PANEL: Insights & discovery -->
-  <div id="rightPanel" class="side-panel right">
-    <div class="side-panel-header">
-      <div class="side-panel-title">Insights & discovery</div>
-      <button class="side-panel-close" data-close="right" type="button">Close</button>
-    </div>
-    <div>
-      <div class="side-panel-section-title">Role angle</div>
-      <div id="roleNote" class="side-panel-role-note"></div>
-    </div>
-    <div>
-      <div class="side-panel-section-title">Discovery questions</div>
-      <div class="side-panel-hint">*Tap a question after you use it to mark it off and avoid repeating yourself.*</div>
-      <ol id="followupList" class="side-panel-list"></ol>
-    </div>
-    <div>
-      <div class="side-panel-section-title">Call notes</div>
-      <div class="side-panel-hint">*Capture key phrases in their language for follow-ups and emails.*</div>
-      <textarea id="rightNotes" placeholder="e.g., 'Biggest pain: no unified view of paid & organic'"></textarea>
     </div>
   </div>
 
@@ -700,13 +723,14 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     const responseCard = document.getElementById('responseCard');
 
     const panelsBtn = document.getElementById('panelsBtn');
+    const sidePanel = document.getElementById('sidePanel');
+    const panelCloseBtn = sidePanel.querySelector('.side-panel-close');
 
-    const leftPanel = document.getElementById('leftPanel');
-    const rightPanel = document.getElementById('rightPanel');
-    const sidePanelCloseButtons = document.querySelectorAll('.side-panel-close');
+    const panelTabButtons = document.querySelectorAll('.panel-tab-btn');
+    const panelTabContents = document.querySelectorAll('.panel-tab-content');
 
-    const leftProspectName = document.getElementById('leftProspectName');
-    const leftCompanyName = document.getElementById('leftCompanyName');
+    const qrProspectName = document.getElementById('qrProspectName');
+    const qrCompanyName = document.getElementById('qrCompanyName');
 
     const roleNote = document.getElementById('roleNote');
     const followupList = document.getElementById('followupList');
@@ -835,18 +859,14 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
       openerBox.textContent = text;
 
-      // Update hint & reaction visibility based on mode
+      // No extra hint; just mark opener as active step
+      openerHint.textContent = '';
       if (currentMode === 'conversation') {
-        openerHint.innerHTML =
-          '<strong>Read it once, then look away:</strong> <em>use your own voice; [Prospect] is their name.</em>';
         reactionSection.style.display = 'block';
-        setActiveStep('opener');
       } else {
-        openerHint.innerHTML =
-          '<strong>Keep the voicemail clean and brief:</strong> <em>tweak the wording so it sounds like you.</em>';
         reactionSection.style.display = 'none';
-        setActiveStep('opener');
       }
+      setActiveStep('opener');
     }
 
     function updateRoleNote() {
@@ -869,7 +889,7 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     function clearReactionSelection() {
       reactionButtons.forEach(btn => btn.classList.remove('active'));
-      responseCard.textContent = ''; // no repetitive instructions
+      responseCard.textContent = '';
     }
 
     // --- EVENTS: SETUP ---
@@ -884,9 +904,9 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     prospectNameInput.addEventListener('input', buildOpener);
 
     goLiveBtn.addEventListener('click', () => {
-      // Sync prospect/company to left panel quick reference
-      leftProspectName.value = prospectNameInput.value;
-      leftCompanyName.value = companyNameInput.value;
+      // Sync prospect/company to quick reference panel
+      qrProspectName.value = prospectNameInput.value;
+      qrCompanyName.value = companyNameInput.value;
 
       buildOpener();
       updateRoleNote();
@@ -923,31 +943,28 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
       });
     });
 
-    // --- PANELS BUTTON (TOGGLE BOTH SIDES) ---
+    // --- PANELS TOGGLE (right side only) ---
 
     panelsBtn.addEventListener('click', () => {
-      const anyOpen =
-        leftPanel.classList.contains('open') ||
-        rightPanel.classList.contains('open');
-      if (anyOpen) {
-        leftPanel.classList.remove('open');
-        rightPanel.classList.remove('open');
-      } else {
-        leftPanel.classList.add('open');
-        rightPanel.classList.add('open');
-      }
+      sidePanel.classList.toggle('open');
     });
 
-    sidePanelCloseButtons.forEach(btn => {
+    panelCloseBtn.addEventListener('click', () => {
+      sidePanel.classList.remove('open');
+    });
+
+    // --- PANEL TABS ---
+
+    panelTabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        const target = btn.dataset.close;
-        if (target === 'left') leftPanel.classList.remove('open');
-        if (target === 'right') rightPanel.classList.remove('open');
+        const tab = btn.dataset.tab;
+        panelTabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        panelTabContents.forEach(c => {
+          c.classList.toggle('active', c.id === (tab === 'quick' ? 'panelQuick' : 'panelInsights'));
+        });
       });
     });
-
-    leftPanel.addEventListener('click', e => e.stopPropagation());
-    rightPanel.addEventListener('click', e => e.stopPropagation());
 
     // --- INITIAL STATE ---
     updateTimerDisplay();
