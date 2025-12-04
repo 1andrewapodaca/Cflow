@@ -1,15 +1,26 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Live Call Flow Coach – Simplified</title>
+  <title>Call Flow Coach – V2 Focus Mode + Voicemail</title>
   <style>
     * { box-sizing: border-box; }
+    :root {
+      --bg: #020617;
+      --bg-elevated: #020617;
+      --border-subtle: #111827;
+      --border-strong: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #818cf8;
+      --accent-soft: #4f46e5;
+    }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      background: var(--bg);
+      color: var(--text-main);
     }
     .app {
       max-width: 1000px;
@@ -17,171 +28,408 @@
       padding: 16px;
     }
     header {
-      border-bottom: 1px solid #1f2933;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
     }
     header h1 {
-      font-size: 1.3rem;
       margin: 0 0 4px;
+      font-size: 1.25rem;
+      letter-spacing: 0.01em;
     }
     header p {
       margin: 0;
-      font-size: 0.85rem;
-      color: #9ca3af;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
-    .layout {
+
+    /* Tabs */
+    .tabs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
-    .panel {
+    .tab {
+      flex: 0 0 auto;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
       background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 8px;
-      padding: 10px 12px 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
     }
-    .panel h2 {
-      font-size: 0.95rem;
-      margin: 0 0 6px;
-      color: #e5e7eb;
+    .tab.active {
+      background: #111827;
+      color: var(--text-main);
+      border-color: var(--accent);
     }
-    .panel small {
-      color: #6b7280;
-      font-size: 0.78rem;
+
+    .view {
+      display: none;
     }
-    .controls {
-      flex: 1 1 230px;
-      min-width: 230px;
-      max-width: 280px;
+    .view.active {
+      display: block;
     }
-    .content {
-      flex: 2 1 360px;
-      min-width: 330px;
+
+    .panel {
+      position: relative;
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      padding: 12px 14px 14px;
+      overflow: hidden;
     }
+
     label {
       display: block;
       font-size: 0.8rem;
       margin-bottom: 4px;
-      color: #9ca3af;
+      color: var(--text-muted);
     }
-    select {
+    select, input[type="text"] {
       width: 100%;
-      padding: 6px 8px;
-      border-radius: 6px;
+      padding: 7px 9px;
+      border-radius: 8px;
       border: 1px solid #4b5563;
       background: #020617;
-      color: #e5e7eb;
+      color: var(--text-main);
       font-size: 0.9rem;
-      margin-bottom: 9px;
+      margin-bottom: 10px;
     }
     .toggle-row {
-      margin-top: 4px;
       display: flex;
       flex-direction: column;
       gap: 4px;
+      margin-top: 4px;
     }
     .toggle-row label {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 0.8rem;
-      cursor: pointer;
+      gap: 6px;
+      font-size: 0.78rem;
       color: #cbd5f5;
+      cursor: pointer;
     }
-    textarea.script-display {
-      width: 100%;
-      min-height: 120px;
-      resize: vertical;
-      padding: 8px;
-      border-radius: 8px;
+
+    .primary-btn {
+      margin-top: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
       border: 1px solid #4b5563;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      white-space: pre-wrap;
+      background: #111827;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      cursor: pointer;
     }
-    .section-title {
-      font-size: 0.88rem;
-      font-weight: 600;
-      margin: 6px 0 4px;
-      color: #e5e7eb;
+    .primary-btn:hover {
+      border-color: var(--accent);
     }
+
     .hint {
       font-size: 0.75rem;
       color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    /* Live view core */
+    .live-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .live-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .live-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .live-mode-toggle {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      overflow: hidden;
+    }
+    .live-mode-toggle button {
+      padding: 3px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      cursor: pointer;
+    }
+    .live-mode-toggle button.active {
+      background: #111827;
+      color: var(--text-main);
+    }
+
+    .timer {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .timer-display {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+    .timer button {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    .timer button:hover {
+      border-color: var(--accent);
+    }
+
+    .panels-btn {
+      position: relative;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: rgba(15,23,42,0.9);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .panels-btn span.caret {
+      font-size: 0.6rem;
+    }
+    .panels-menu {
+      position: absolute;
+      right: 0;
+      top: 115%;
+      background: rgba(15,23,42,0.96);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      padding: 4px 0;
+      min-width: 180px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+      z-index: 20;
+      display: none;
+    }
+    .panels-menu.open {
+      display: block;
+    }
+    .panels-menu button {
+      width: 100%;
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .panels-menu button:hover {
+      background: #111827;
+    }
+
+    .opener-block {
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+    .opener-box {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #374151;
+      background: radial-gradient(circle at top left, rgba(79,70,229,0.08), transparent 60%), #020617;
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .reaction-section {
+      margin-top: 4px;
+    }
+    .reaction-label {
+      font-size: 0.8rem;
+      font-weight: 500;
       margin-bottom: 4px;
     }
     .reaction-buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin: 6px 0 6px;
+      margin-bottom: 6px;
     }
     .reaction-buttons button {
-      padding: 4px 10px;
+      padding: 5px 11px;
       border-radius: 999px;
       border: 1px solid #4b5563;
       background: #020617;
-      color: #e5e7eb;
+      color: var(--text-main);
       font-size: 0.78rem;
       cursor: pointer;
     }
     .reaction-buttons button:hover {
-      border-color: #a5b4fc;
+      border-color: var(--accent);
     }
     .reaction-buttons button.active {
-      border-color: #818cf8;
+      border-color: var(--accent);
       background: #111827;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
     }
-    .role-note {
-      font-size: 0.78rem;
-      color: #9ca3af;
-      margin: 4px 0 0;
-      padding: 4px 6px;
-      border-radius: 6px;
-      background: #020617;
-      border: 1px dashed #374151;
+
+    .response-card {
+      margin-top: 2px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: rgba(15,23,42,0.98);
+      padding: 10px 11px;
+      min-height: 80px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--text-main);
+      box-shadow: 0 16px 45px rgba(0,0,0,0.5);
     }
-    .followup-container {
-      margin-top: 8px;
-      border-top: 1px solid #111827;
-      padding-top: 6px;
-    }
-    .followup-toggle {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #020617;
-      color: #e5e7eb;
+    .response-placeholder {
+      color: #6b7280;
       font-size: 0.8rem;
-      cursor: pointer;
+      font-style: italic;
+    }
+
+    /* Slide-out panels */
+    .side-panel {
+      position: fixed;
+      top: 16px;
+      bottom: 16px;
+      width: 260px;
+      background: rgba(15,23,42,0.98);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+      padding: 10px 12px 12px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transform: translateX(-120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.22s cubic-bezier(0.4,0.0,0.2,1), opacity 0.18s ease-out;
+    }
+    .side-panel.right {
+      right: 16px;
+      left: auto;
+      transform: translateX(120%);
+    }
+    .side-panel.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .side-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 4px;
     }
-    .followup-toggle:hover {
-      border-color: #a5b4fc;
+    .side-panel-title {
+      font-size: 0.85rem;
+      font-weight: 600;
     }
-    .followup-list {
+    .side-panel-close {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .side-panel-section-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+    .side-panel-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+    .side-panel input[type="text"],
+    .side-panel textarea {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: rgba(15,23,42,0.95);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      padding: 6px 8px;
+    }
+    .side-panel textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.4;
+    }
+    .side-panel-role-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: rgba(15,23,42,0.8);
+    }
+    .side-panel-list {
       list-style: decimal;
-      padding-left: 18px;
+      padding-left: 16px;
       margin: 4px 0 0;
     }
-    .followup-list li {
-      font-size: 0.82rem;
+    .side-panel-list li {
+      font-size: 0.78rem;
       margin-bottom: 3px;
       cursor: pointer;
     }
-    .followup-list li.used {
+    .side-panel-list li.used {
       color: #6b7280;
       text-decoration: line-through;
     }
-    @media (max-width: 768px) {
-      .layout {
-        flex-direction: column;
+
+    .tools-body {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .tools-body p {
+      margin: 4px 0;
+    }
+    .tools-body ul {
+      margin: 4px 0 0;
+      padding-left: 16px;
+    }
+    .tools-body li {
+      margin-bottom: 2px;
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 10px;
       }
-      .controls, .content {
-        max-width: 100%;
+      .side-panel {
+        top: 10px;
+        bottom: 10px;
+        width: 82%;
       }
     }
   </style>
@@ -189,77 +437,158 @@
 <body>
   <div class="app">
     <header>
-      <h1>Live Call Flow Coach – Marketing Analytics</h1>
-      <p>Step 1: Pick the role and opener. Step 2: Use the opener, react live, then pull in follow-ups if needed.</p>
+      <h1>Call Flow Coach – Focus Mode</h1>
+      <p>Setup before you dial, then switch to Live mode for a clean, distraction-free call flow with optional panels and voicemail mode.</p>
     </header>
 
-    <div class="layout">
-      <!-- LEFT: SIMPLE CONTROLS -->
-      <div class="panel controls">
-        <h2>Step 1 – Call setup</h2>
-        <small>Select who you’re calling and how you want to open.</small>
+    <div class="tabs">
+      <button class="tab active" data-view="setupView">Setup</button>
+      <button class="tab" data-view="liveView">Live</button>
+      <button class="tab" data-view="toolsView">Tools</button>
+    </div>
 
-        <div style="margin-top: 8px;">
-          <label for="roleSelect">Prospect role</label>
-          <select id="roleSelect">
-            <option value="generic">Generic marketing leader</option>
-            <option value="cmo">CMO / SVP Marketing</option>
-            <option value="vp" selected>VP / Head of Marketing / Growth</option>
-            <option value="ops">Marketing Ops / RevOps</option>
-            <option value="demand">Director Demand Gen / Performance</option>
-          </select>
+    <!-- SETUP VIEW -->
+    <div id="setupView" class="view active">
+      <div class="panel">
+        <label for="roleSelect">Who are you calling?</label>
+        <select id="roleSelect">
+          <option value="generic">Generic marketing leader</option>
+          <option value="cmo">CMO / SVP Marketing</option>
+          <option value="vp" selected>VP / Head of Marketing / Growth</option>
+          <option value="ops">Marketing Ops / RevOps</option>
+          <option value="demand">Director Demand Gen / Performance</option>
+        </select>
 
-          <label for="openerSelect">Opening style</label>
-          <select id="openerSelect">
-            <option value="clarity">Option 1 – Clarity / Visibility</option>
-            <option value="performance" selected>Option 3 – Performance / Focus</option>
-          </select>
+        <label for="openerSelect">How do you want to open?</label>
+        <select id="openerSelect">
+          <option value="clarity">Option 1 – Clarity / Visibility</option>
+          <option value="performance" selected>Option 3 – Performance / Focus</option>
+        </select>
 
-          <div class="toggle-row">
-            <label><input type="checkbox" id="showAndrew" checked /> Use “Andrew” in script</label>
-            <label><input type="checkbox" id="showCompany" checked /> Mention Certatude</label>
+        <div class="toggle-row">
+          <label><input type="checkbox" id="showAndrew" checked /> Use “Andrew” in script</label>
+          <label><input type="checkbox" id="showCompany" checked /> Mention Certatude lightly</label>
+        </div>
+
+        <label for="prospectName" style="margin-top:8px;">Prospect name (optional)</label>
+        <input type="text" id="prospectName" placeholder="e.g., Claire">
+
+        <label for="companyName">Company (optional)</label>
+        <input type="text" id="companyName" placeholder="e.g., Acme SaaS">
+
+        <button id="goLiveBtn" class="primary-btn" type="button">Go to Live mode</button>
+      </div>
+    </div>
+
+    <!-- LIVE VIEW -->
+    <div id="liveView" class="view">
+      <div class="panel">
+        <div class="live-header">
+          <div class="live-header-left">
+            <div class="live-title">Live</div>
+            <div class="live-mode-toggle">
+              <button type="button" data-mode="conversation" class="active">Conversation</button>
+              <button type="button" data-mode="voicemail">Voicemail</button>
+            </div>
+            <div class="timer">
+              <span class="timer-display" id="timerDisplay">00:00</span>
+              <button id="timerStartPause" type="button">Start</button>
+              <button id="timerReset" type="button">Reset</button>
+            </div>
+          </div>
+          <div class="live-right">
+            <button id="panelsBtn" class="panels-btn" type="button">
+              <span>Panels</span><span class="caret">▾</span>
+            </button>
+            <div id="panelsMenu" class="panels-menu">
+              <button type="button" data-panel-action="left">Quick reference (left)</button>
+              <button type="button" data-panel-action="right">Insights & discovery (right)</button>
+              <button type="button" data-panel-action="hide">Hide all panels</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- RIGHT: LIVE FLOW -->
-      <div class="panel content">
-        <div>
-          <div class="section-title">Step 2 – Opener to read</div>
-          <div class="hint">Use [Prospect] as a mental placeholder. Read this slowly.</div>
-          <textarea id="openerText" class="script-display" readonly></textarea>
+        <div class="opener-block">
+          <div class="hint" id="openerHint">Glance once, then use your own voice. [Prospect] = their name.</div>
+          <div id="openerBox" class="opener-box"></div>
         </div>
 
-        <div style="margin-top: 6px;">
-          <div class="section-title">Step 3 – Live reaction</div>
-          <div class="hint">Tap what you hear, then read the suggested line.</div>
+        <div id="reactionSection" class="reaction-section">
+          <div class="reaction-label">Their reaction</div>
+          <div class="hint">Tap what you hear; the suggested next line will appear below.</div>
           <div class="reaction-buttons">
             <button type="button" data-reaction="open">Open / curious</button>
             <button type="button" data-reaction="busy">Busy / time-pressed</button>
             <button type="button" data-reaction="fine">“We’re fine / covered”</button>
             <button type="button" data-reaction="notnow">“Not a priority now”</button>
           </div>
-          <textarea id="reactionText" class="script-display" readonly placeholder="Your live response will appear here after you choose a reaction."></textarea>
-        </div>
-
-        <div style="margin-top: 6px;">
-          <div class="section-title">Role-specific angle</div>
-          <div id="roleNote" class="role-note"></div>
-        </div>
-
-        <div class="followup-container">
-          <button id="followupToggle" class="followup-toggle" type="button">Show follow-up questions</button>
-          <div id="followupSection" style="display: none;">
-            <div class="hint">Tap a question after you’ve used it to mark it off.</div>
-            <ol id="followupList" class="followup-list"></ol>
+          <div id="responseCard" class="response-card">
+            <div class="response-placeholder">Once they respond, tap a reaction above to see a suggested line.</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLS VIEW -->
+    <div id="toolsView" class="view">
+      <div class="panel">
+        <div class="tools-body">
+          <p><strong>Tools & reference</strong></p>
+          <p>This area can hold:</p>
+          <ul>
+            <li>Alternate opener variants (e.g., SaaS-specific, agency-specific)</li>
+            <li>Additional voicemail variations</li>
+            <li>Personal notes or tweaks you want to keep handy</li>
+          </ul>
+          <p>For now, Live mode is your primary workspace. Treat this tab as an optional library to expand later.</p>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- LEFT SIDE PANEL: Quick reference -->
+  <div id="leftPanel" class="side-panel">
+    <div class="side-panel-header">
+      <div class="side-panel-title">Quick reference</div>
+      <button class="side-panel-close" data-close="left" type="button">Close</button>
+    </div>
+    <div>
+      <div class="side-panel-section-title">Prospect</div>
+      <div class="side-panel-hint">Keep names and company top-of-mind.</div>
+      <input type="text" id="leftProspectName" placeholder="Prospect name" />
+      <input type="text" id="leftCompanyName" placeholder="Company" />
+    </div>
+    <div>
+      <div class="side-panel-section-title">Quick notes</div>
+      <div class="side-panel-hint">One or two anchor points for what matters to them.</div>
+      <textarea id="leftQuickNotes" placeholder="e.g., attribution clarity, Q1 pipeline, AI expectations..."></textarea>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE PANEL: Insights & discovery -->
+  <div id="rightPanel" class="side-panel right">
+    <div class="side-panel-header">
+      <div class="side-panel-title">Insights & discovery</div>
+      <button class="side-panel-close" data-close="right" type="button">Close</button>
+    </div>
+    <div>
+      <div class="side-panel-section-title">Role angle</div>
+      <div id="roleNote" class="side-panel-role-note"></div>
+    </div>
+    <div>
+      <div class="side-panel-section-title">Discovery questions</div>
+      <div class="side-panel-hint">Tap a question after you use it to mark it off.</div>
+      <ol id="followupList" class="side-panel-list"></ol>
+    </div>
+    <div>
+      <div class="side-panel-section-title">Call notes</div>
+      <div class="side-panel-hint">Capture key lines or phrases in their language.</div>
+      <textarea id="rightNotes" placeholder="e.g., 'Biggest pain: no unified view of paid & organic'"></textarea>
+    </div>
+  </div>
+
   <script>
-    // --- SCRIPT DATA ---
+    // --- DATA ---
 
     const openers = {
       clarity: `[Prospect], it’s Andrew Apodaca — I know you weren’t expecting my call, I’ll be brief.
@@ -275,12 +604,27 @@ I work with marketing leaders who are looking to get sharper on where performanc
 When you think about improving marketing performance going into next quarter, where are you placing the most focus?`
     };
 
+    // Voicemail variants aligned with the two opener styles
+    const voicemailOpeners = {
+      clarity: `Hi [Prospect], it’s Andrew Apodaca calling.
+
+I work with marketing teams on getting a clearer view of what’s actually driving results, especially when attribution and reporting are sending mixed signals.
+
+No need to call back urgently — I’ll also send a quick note with a bit more context. If tightening up visibility around what’s really moving the needle is on your radar, feel free to reply or grab time that works best for you.`,
+
+      performance: `Hi [Prospect], it’s Andrew Apodaca.
+
+I partner with marketing leaders who want a sharper read on where performance is really coming from in their mix — without ripping out what they already have.
+
+I’ll follow up with a short email so you have the details in writing, but if improving confidence in what’s driving pipeline and revenue is something you’re exploring, you can simply reply there or book a brief intro at a time that works for you.`
+    };
+
     const roleNotes = {
-      generic: `Keep it neutral. Focus on clarity, performance, and decision-making support — not tools or tactics.`,
-      cmo: `CMO angle: emphasize exec/board visibility, confidence in what’s driving growth, and avoiding extra complexity or headcount.`,
-      vp: `VP Marketing / Growth angle: highlight campaign performance, pipeline impact, and making faster, cleaner calls on where to invest.`,
-      ops: `Marketing Ops / RevOps angle: lean into data alignment across platforms, reporting speed, and trust in the numbers.`,
-      demand: `Demand Gen angle: talk about channel mix, campaign lift, and understanding which levers are really moving pipeline and revenue.`
+      generic: `Keep it neutral. Anchor around clarity, performance, and decision-making support.`,
+      cmo: `CMO: tie everything to exec/board visibility, confidence in what’s driving growth, and avoiding extra complexity or headcount.`,
+      vp: `VP Marketing / Growth: emphasize campaign performance, pipeline impact, and faster, cleaner calls on where to invest.`,
+      ops: `Marketing Ops / RevOps: focus on data alignment across platforms, reporting speed, and trust in the numbers.`,
+      demand: `Demand Gen: lean into channel mix, campaign lift, and which levers truly move pipeline and revenue.`
     };
 
     const reactions = {
@@ -309,46 +653,162 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
       `If you could snap your fingers and improve one part of your visibility or performance story, what would you change first?`
     ];
 
-    // --- DOM ELEMENTS ---
+    // --- ELEMENTS ---
+    const tabs = document.querySelectorAll('.tab');
+    const views = document.querySelectorAll('.view');
+
     const roleSelect = document.getElementById('roleSelect');
     const openerSelect = document.getElementById('openerSelect');
-    const openerText = document.getElementById('openerText');
-    const reactionText = document.getElementById('reactionText');
-    const roleNote = document.getElementById('roleNote');
-    const followupList = document.getElementById('followupList');
-    const followupToggle = document.getElementById('followupToggle');
-    const followupSection = document.getElementById('followupSection');
     const showAndrew = document.getElementById('showAndrew');
     const showCompany = document.getElementById('showCompany');
-    const reactionButtons = document.querySelectorAll('.reaction-buttons button');
+    const prospectNameInput = document.getElementById('prospectName');
+    const companyNameInput = document.getElementById('companyName');
+    const goLiveBtn = document.getElementById('goLiveBtn');
 
-    // --- HELPERS ---
+    const openerBox = document.getElementById('openerBox');
+    const openerHint = document.getElementById('openerHint');
+    const reactionSection = document.getElementById('reactionSection');
+    const reactionButtons = document.querySelectorAll('.reaction-buttons button');
+    const responseCard = document.getElementById('responseCard');
+
+    const panelsBtn = document.getElementById('panelsBtn');
+    const panelsMenu = document.getElementById('panelsMenu');
+
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+    const sidePanelCloseButtons = document.querySelectorAll('.side-panel-close');
+
+    const leftProspectName = document.getElementById('leftProspectName');
+    const leftCompanyName = document.getElementById('leftCompanyName');
+
+    const roleNote = document.getElementById('roleNote');
+    const followupList = document.getElementById('followupList');
+
+    const modeButtons = document.querySelectorAll('.live-mode-toggle button');
+
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerStartPause = document.getElementById('timerStartPause');
+    const timerReset = document.getElementById('timerReset');
+
+    // --- STATE ---
+    let currentMode = 'conversation'; // 'conversation' or 'voicemail'
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    // --- VIEW NAVIGATION ---
+
+    function switchView(targetId) {
+      views.forEach(v => v.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active');
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(t => {
+        if (t.dataset.view === targetId) t.classList.add('active');
+      });
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.view;
+        switchView(target);
+      });
+    });
+
+    // --- TIMER LOGIC ---
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const secs = String(timerSeconds % 60).padStart(2, '0');
+      timerDisplay.textContent = `${mins}:${secs}`;
+    }
+
+    function startTimer() {
+      if (timerInterval !== null) return;
+      timerInterval = setInterval(() => {
+        timerSeconds += 1;
+        updateTimerDisplay();
+      }, 1000);
+      timerStartPause.textContent = 'Pause';
+    }
+
+    function pauseTimer() {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timerStartPause.textContent = 'Start';
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerSeconds = 0;
+      updateTimerDisplay();
+    }
+
+    timerStartPause.addEventListener('click', () => {
+      if (timerInterval === null) {
+        startTimer();
+      } else {
+        pauseTimer();
+      }
+    });
+
+    timerReset.addEventListener('click', resetTimer);
+
+    // --- OPENER BUILDING ---
+
+    function getBaseTextForMode() {
+      const style = openerSelect.value;
+      return currentMode === 'conversation'
+        ? openers[style]
+        : voicemailOpeners[style];
+    }
 
     function buildOpener() {
-      const style = openerSelect.value; // clarity or performance
-      let text = openers[style];
+      let text = getBaseTextForMode();
 
-      // Name and company toggles
+      // Name & Certatude toggles
       if (!showAndrew.checked) {
         text = text.replace(/Andrew Apodaca/g, 'Andrew');
       }
-      if (!showCompany.checked) {
-        text = text.replace(/ with Certatude/g, '');
-      } else {
-        // Light-touch mention of Certatude in second line if using company
+      if (showCompany.checked) {
         if (!text.includes('Certatude')) {
           text = text.replace(
             'I work with marketing leaders',
-            'I work with marketing leaders at Certatude'
+            'At Certatude, I work with marketing leaders'
+          );
+          text = text.replace(
+            'I partner with marketing leaders',
+            'At Certatude, I partner with marketing leaders'
           );
           text = text.replace(
             'I spend a lot of time with marketing teams',
             'At Certatude, I spend a lot of time with marketing teams'
           );
+          text = text.replace(
+            'I work with marketing teams',
+            'At Certatude, I work with marketing teams'
+          );
         }
+      } else {
+        text = text.replace(/At Certatude, /g, '');
+        text = text.replace(/ at Certatude/g, '');
       }
 
-      openerText.value = text;
+      const prospectName = prospectNameInput.value.trim();
+      if (prospectName) {
+        text = text.replace(/\[Prospect\]/g, prospectName);
+      }
+
+      openerBox.textContent = text;
+
+      // Update hint & reaction visibility based on mode
+      if (currentMode === 'conversation') {
+        openerHint.textContent = 'Glance once, then use your own voice. [Prospect] = their name.';
+        reactionSection.style.display = 'block';
+      } else {
+        openerHint.textContent = 'Short, confident voicemail. Feel free to adjust phrasing so it sounds like you.';
+        reactionSection.style.display = 'none';
+      }
     }
 
     function updateRoleNote() {
@@ -371,50 +831,99 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     function clearReactionSelection() {
       reactionButtons.forEach(btn => btn.classList.remove('active'));
-      reactionText.value = '';
+      responseCard.innerHTML = '<div class="response-placeholder">Once they respond, tap a reaction above to see a suggested line.</div>';
     }
 
-    // --- EVENT WIRING ---
+    // --- EVENTS: SETUP ---
 
     openerSelect.addEventListener('change', () => {
       buildOpener();
       clearReactionSelection();
     });
+    showAndrew.addEventListener('change', buildOpener);
+    showCompany.addEventListener('change', buildOpener);
+    roleSelect.addEventListener('change', updateRoleNote);
+    prospectNameInput.addEventListener('input', buildOpener);
 
-    roleSelect.addEventListener('change', () => {
+    goLiveBtn.addEventListener('click', () => {
+      // Sync prospect/company to left panel quick reference
+      leftProspectName.value = prospectNameInput.value;
+      leftCompanyName.value = companyNameInput.value;
+
+      buildOpener();
       updateRoleNote();
+      renderFollowups();
+      clearReactionSelection();
+      resetTimer();
+      switchView('liveView');
     });
 
-    showAndrew.addEventListener('change', () => {
-      buildOpener();
-    });
-
-    showCompany.addEventListener('change', () => {
-      buildOpener();
-    });
+    // --- EVENTS: LIVE REACTIONS ---
 
     reactionButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.dataset.reaction;
         reactionButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        reactionText.value = reactions[key] || '';
+        responseCard.textContent = reactions[key] || '';
       });
     });
 
-    followupToggle.addEventListener('click', () => {
-      const isHidden = followupSection.style.display === 'none';
-      followupSection.style.display = isHidden ? 'block' : 'none';
-      followupToggle.textContent = isHidden
-        ? 'Hide follow-up questions'
-        : 'Show follow-up questions';
+    // --- MODE TOGGLE (Conversation / Voicemail) ---
+
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        if (mode === currentMode) return;
+        currentMode = mode;
+        modeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        buildOpener();
+        clearReactionSelection();
+      });
     });
 
-    // --- INITIALIZE ---
-    buildOpener();
-    updateRoleNote();
-    renderFollowups();
+    // --- PANELS MENU & SIDE PANELS ---
+
+    panelsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panelsMenu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      panelsMenu.classList.remove('open');
+    });
+
+    panelsMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const action = e.target.dataset.panelAction;
+      if (!action) return;
+      panelsMenu.classList.remove('open');
+
+      if (action === 'left') {
+        leftPanel.classList.toggle('open');
+      } else if (action === 'right') {
+        rightPanel.classList.toggle('open');
+      } else if (action === 'hide') {
+        leftPanel.classList.remove('open');
+        rightPanel.classList.remove('open');
+      }
+    });
+
+    sidePanelCloseButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.close;
+        if (target === 'left') leftPanel.classList.remove('open');
+        if (target === 'right') rightPanel.classList.remove('open');
+      });
+    });
+
+    leftPanel.addEventListener('click', e => e.stopPropagation());
+    rightPanel.addEventListener('click', e => e.stopPropagation());
+
+    // --- INITIAL STATE ---
+    // Start in setup view. Timer at 00:00. Opener is built when going live.
+    updateTimerDisplay();
   </script>
 </body>
 </html>
-
