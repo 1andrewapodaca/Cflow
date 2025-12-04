@@ -524,7 +524,7 @@
             </div>
           </div>
 
-          <!-- Conversation phase tabs (only meaningful in conversation mode) -->
+          <!-- Conversation phase tabs -->
           <div id="phaseTabs" class="phase-tabs">
             <button type="button" class="phase-tab-btn active" data-phase="intro">Introduction</button>
             <button type="button" class="phase-tab-btn" data-phase="presentation">Presentation</button>
@@ -563,7 +563,7 @@
               *Summarize what you heard, then connect 1–2 specific outcomes you can help with. Keep it short and concrete.*
             </div>
             <textarea id="presentationNotes" class="phase-notes-area"
-              placeholder="e.g., &quot;You mentioned pipeline visibility across paid + events is fuzzy — we’ve helped teams pull those into one view and tie it to revenue so leadership sees what's working.&quot;"></textarea>
+              placeholder="We heard X → here’s the 1–2 outcomes we can realistically improve without ripping anything out."></textarea>
           </div>
 
           <!-- CLOSE SECTION -->
@@ -573,7 +573,7 @@
               *Confirm fit (or not), propose a next step, and make the &quot;yes&quot; easy. Use their language when you recap.*
             </div>
             <textarea id="closeNotes" class="phase-notes-area"
-              placeholder="e.g., &quot;Sounds like it could help, but timing is tight — how about a 20-minute working session next week to map one campaign and see if this is worth moving forward?&quot;"></textarea>
+              placeholder="Recap what you heard in their words, confirm interest, then offer an easy next step (short working session, follow-up with teammate, etc.)."></textarea>
           </div>
         </div>
       </div>
@@ -688,6 +688,60 @@ When teams tell me that, it’s often still because there are one or two areas t
 Just so I don’t show up in your inbox with something off-base: when you do look at tightening up your marketing visibility or ROI story, what’s the trigger that usually makes it a priority for you?`
     };
 
+    // Style-specific suggestions for Presentation
+    const presentationSnippets = {
+      clarity: `“Let me play back what I’m hearing: right now, a lot of the tension is around seeing a clean, unified story across channels — and being confident that what you’re presenting upstairs actually matches what’s happening in the data.
+
+Where we usually help is:
+- Pulling paid, owned, and lifecycle touchpoints into a single, trusted view
+- Making it easier to answer ‘what’s working / what’s not’ in minutes, not weeks
+
+We’d look at your current stack first and layer better visibility on top of what you already have — no rip-and-replace.”`,
+
+      roi: `“The theme I’m hearing is: you’re investing a lot, but it’s hard to show a crisp line from spend to revenue in a way everyone trusts.
+
+What we typically do is:
+- Tighten the link between campaign activity and pipeline / bookings
+- Build a small set of ROI views that leadership actually uses to make decisions
+
+The idea wouldn’t be a big platform project — more a focused effort to prove where the money is working hardest and where you can safely pull back.”`,
+
+      performance: `“It sounds like the real question is where performance is *really* coming from — not just which channels look good in isolation.
+
+Where we help is:
+- Identifying the 2–3 levers that are truly driving pipeline and revenue
+- Showing what happens if you shift budget between those levers
+
+We’d start by pressure-testing what you already believe is working, then show you, with data, where you can lean in or pull back without adding complexity.”`
+    };
+
+    // Style-specific suggestions for Close
+    const closeSnippets = {
+      clarity: `“Based on what you shared, it sounds like clearer, more trusted visibility would be valuable — especially if it doesn’t add more reporting overhead.
+
+A simple next step could be a 20–30 minute working session with you (and whoever owns reporting) where we:
+- Look at one or two core reports you rely on today
+- Map what’s missing for you to feel ‘board-ready’ on the numbers
+
+If that feels useful, I can send over a couple of times for next week, or you can suggest what works best on your side.”`,
+
+      roi: `“What I’m hearing is that proving ROI — in a way the broader leadership team believes — is still harder than it should be.
+
+A good next step might be a short working session focused on one key initiative or channel, where we:
+- Follow the money from spend → pipeline → revenue
+- Identify 1–2 places you could either invest more confidently or pull back
+
+If that would be helpful, we can set up 20–30 minutes with you and a key stakeholder, and you can decide from there if it warrants a deeper look.”`,
+
+      performance: `“It sounds like you’re looking for sharper answers on which parts of the mix are *really* driving performance — without adding yet another tool or initiative to manage.
+
+We could start with a focused session where we:
+- Take one segment or campaign cluster you care about
+- Show how we’d separate signal from noise and highlight the strongest levers
+
+If that feels worthwhile, I’m happy to propose a couple of slots next week, or we can align around what works best on your calendar.”`
+    };
+
     const followUps = [
       `How are you currently tracking marketing performance across your main channels today?`,
       `What’s working well with your stack right now, and what still feels messy or slow when you need answers?`,
@@ -718,6 +772,8 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
 
     const phaseTabButtons = document.querySelectorAll('.phase-tab-btn');
     const phaseSections = document.querySelectorAll('.phase-section');
+    const presentationNotes = document.getElementById('presentationNotes');
+    const closeNotes = document.getElementById('closeNotes');
 
     const qrProspectName = document.getElementById('qrProspectName');
     const qrCompanyName = document.getElementById('qrCompanyName');
@@ -801,11 +857,22 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
         sec.classList.toggle('active', sec.dataset.phase === phase);
       });
 
-      if (phase === 'intro' && currentMode === 'conversation') {
-        setActiveStep('opener');
-      } else {
-        openerBox.classList.remove('active-step');
-        reactionSection.classList.remove('active-step');
+      if (currentMode === 'conversation') {
+        if (phase === 'intro') {
+          setActiveStep('opener');
+        } else {
+          openerBox.classList.remove('active-step');
+          reactionSection.classList.remove('active-step');
+        }
+      }
+
+      // Auto-suggest for Presentation / Close (only if empty)
+      const style = openerSelect.value;
+      if (phase === 'presentation' && !presentationNotes.value.trim()) {
+        presentationNotes.value = presentationSnippets[style] || '';
+      }
+      if (phase === 'close' && !closeNotes.value.trim()) {
+        closeNotes.value = closeSnippets[style] || '';
       }
     }
 
@@ -876,6 +943,14 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
         phaseTabs.style.display = 'none';
         openerBox.classList.remove('active-step');
       }
+
+      // Update suggested snippets if their fields are still empty
+      if (!presentationNotes.value.trim()) {
+        presentationNotes.value = presentationSnippets[openerSelect.value] || '';
+      }
+      if (!closeNotes.value.trim()) {
+        closeNotes.value = closeSnippets[openerSelect.value] || '';
+      }
     }
 
     function updateRoleNote() {
@@ -902,7 +977,9 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
       phaseNext.style.display = 'none';
     }
 
-    // --- EVENTS: SETUP ---
+    const phaseTabs = document.getElementById('phaseTabs');
+
+    // --- SETUP EVENTS ---
     openerSelect.addEventListener('change', () => {
       buildOpener();
       clearReactionSelection();
@@ -911,8 +988,6 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
     showCompany.addEventListener('change', buildOpener);
     roleSelect.addEventListener('change', updateRoleNote);
     prospectNameInput.addEventListener('input', buildOpener);
-
-    const phaseTabs = document.getElementById('phaseTabs');
 
     goLiveBtn.addEventListener('click', () => {
       // sync quick ref
@@ -961,12 +1036,14 @@ Just so I don’t show up in your inbox with something off-base: when you do loo
           phaseTabs.style.display = 'inline-flex';
           buildOpener();
           clearReactionSelection();
+          setPhase('intro');
         } else {
           phaseTabs.style.display = 'none';
           reactionSection.style.display = 'none';
           openerHint.textContent = '';
           openerBox.classList.remove('active-step');
-          openerBox.textContent = getBaseTextForMode().replace(/\[Prospect\]/g, prospectNameInput.value.trim() || '[Prospect]');
+          const prospectName = prospectNameInput.value.trim() || '[Prospect]';
+          openerBox.textContent = getBaseTextForMode().replace(/\[Prospect\]/g, prospectName);
         }
       });
     });
